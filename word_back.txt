@@ -1,0 +1,30 @@
+#!/bin/bash
+printf 'enter username:\n'
+read username
+if [[ $(cat /etc/trueuserdomains|grep $username) ]]
+then
+printf 'user exist\n'
+cd /home/$username/public_html
+#pwd
+database=$(grep DB_NAME wp-config.php | awk -F\' '{print $4}')
+date=`date +%b-%d-%Y-%H-%M-%S`
+#echo $database
+mysqldatabase=$(mysqldump $database > $database$date.sql)
+echo 'creating backup....................'
+backup=$(tar -czf backup.tar.gz$date wp-* xmlrpc.php .htaccess $mysqldatabase)
+printf "backup completed. If you would like to transfer backup to remote server? yes for y no for n\n"
+read choice
+if [ $choice == y ]
+then
+printf "enter remote IP\n"
+read ip
+printf "SSH port\n"
+read ssh
+printf "remote server destination\n"
+read dest
+scp -pr -P $ssh $backup ssh root@$ip:$dest
+printf "backup transfered to remote host\n"
+else
+printf "Thank you\n"
+fi
+fi
