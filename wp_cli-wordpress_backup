@@ -1,0 +1,33 @@
+#!/bin/bash
+VERSION=`grep wp_version wp-includes/version.php| cut -d "$" -f 2|uniq -u`
+echo "the current version is:" $VERSION
+echo "checking for new update"
+wp core check-update --allow-root
+#echo "would you like to update yes for y no for n\n"
+while true; do
+   read -p "Do you wish to update?" yn
+   case $yn in
+     [Yy]* )
+     echo "creating db backup...."
+     DB=`grep DB_NAME wp-config.php | awk -F\' '{print $4}'`
+     mysqldump > $DB.sql
+     echo "DB backup created"
+     echo "creating website backup..."
+     file=backup.tar.gz
+     if [ -f "$file" ]
+     then
+     echo "removing existing backup file"
+     rm -rf $file
+     echo "creating new backup file"
+     tar -czf backup.tar.gz wp-* xmlrpc.php index.php .htaccess
+     else
+     tar -czf backup.tar.gz wp-* xmlrpc.php index.php .htaccess
+     fi
+     echo "updating wordpress"
+     wp core update --allow-root
+     echo "latest version `grep wp_version wp-includes/version.php| cut -d "$" -f 2|uniq -u`"
+     break;;
+     [Nn]* ) exit;;
+     * ) echo "please answer yes or no"
+   esac
+done
