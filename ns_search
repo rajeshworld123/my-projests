@@ -1,0 +1,1 @@
+for i in `cat domain.txt`; do echo $i; dig +short ns $i; echo ++++++++++; done
