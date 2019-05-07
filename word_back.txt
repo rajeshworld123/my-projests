@@ -25,6 +25,6 @@ read dest
 scp -pr -P $ssh $backup ssh root@$ip:$dest
 printf "backup transfered to remote host\n"
 else
-printf "Thank you\n"
+printf "Thank you.please choose your option\n"
 fi
 fi
